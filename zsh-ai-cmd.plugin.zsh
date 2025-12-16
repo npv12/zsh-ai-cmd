@@ -49,28 +49,44 @@ typeset -ga _ZSH_AI_CMD_SPINNER=("⠋" "⠙" "⠹" "⠸" "⠼" "⠴" "⠦" "⠧"
 _zsh_ai_cmd_suggest() {
   _zsh_ai_cmd_get_key || return 1
 
-  # Prepare input (zsh builtins only)
-  local input=${BUFFER[1, CURSOR]}
-  input=${input//$'\n'/; }
-  input=${input//\"/\\\"}
+  # Get text up to cursor
+  local input=${BUFFER[1,CURSOR]}
 
-  local context="
-      <context>
-        OS: $_ZSH_AI_CMD_OS
-        Shell: ${SHELL:t}
-        PWD: $PWD
-      </context>
-    "
+  local context="<context>
+OS: $_ZSH_AI_CMD_OS
+Shell: ${SHELL:t}
+PWD: $PWD
+</context>"
 
-  # Build JSON (escape for embedding)
-  local prompt=${_ZSH_AI_CMD_PROMPT}$'\n'${context}
-  prompt=${prompt//$'\n'/\\n}
-  prompt=${prompt//\"/\\\"}
+  local prompt="${_ZSH_AI_CMD_PROMPT}"$'\n'"${context}"
 
   # JSON schema for structured output (guarantees single command string)
-  local schema='{"type":"object","properties":{"command":{"type":"string","description":"The shell command to execute"}},"required":["command"],"additionalProperties":false}'
+  local schema='{
+    "type": "object",
+    "properties": {
+      "command": {
+        "type": "string",
+        "description": "The shell command to execute"
+      }
+    },
+    "required": ["command"],
+    "additionalProperties": false
+  }'
 
-  local payload="{\"model\":\"$ZSH_AI_CMD_MODEL\",\"max_tokens\":256,\"system\":\"$prompt\",\"messages\":[{\"role\":\"user\",\"content\":\"$input\"}],\"output_format\":{\"type\":\"json_schema\",\"schema\":$schema}}"
+  # Build payload with jq (handles all escaping correctly)
+  local payload
+  payload=$(command jq -nc \
+    --arg model "$ZSH_AI_CMD_MODEL" \
+    --arg system "$prompt" \
+    --arg content "$input" \
+    --argjson schema "$schema" \
+    '{
+      model: $model,
+      max_tokens: 256,
+      system: $system,
+      messages: [{role: "user", content: $content}],
+      output_format: {type: "json_schema", schema: $schema}
+    }')
 
   # Call API with spinner animation
   _zsh_ai_cmd_call_api "$payload" || return 1
@@ -88,7 +104,7 @@ _zsh_ai_cmd_suggest() {
     print -r -- "$EPOCHSECONDS|$input|$suggestion" >>/tmp/zsh-ai-cmd.log
 
   # Clear autosuggestions if loaded
-  (($ + functions[_zsh_autosuggest_clear])) && _zsh_autosuggest_clear
+  (( $+functions[_zsh_autosuggest_clear] )) && _zsh_autosuggest_clear
 
   BUFFER=$suggestion
   CURSOR=$#BUFFER

@@ -109,20 +109,40 @@ validate_output() {
 call_api() {
     local input=$1
 
-    # Build context
     local context="<context>
 OS: $_ZSH_AI_CMD_OS
 Shell: zsh
 PWD: /tmp/test
 </context>"
 
-    local prompt=${_ZSH_AI_CMD_PROMPT}$'\n'${context}
-    prompt=${prompt//$'\n'/\\n}
-    prompt=${prompt//\"/\\\"}
+    local prompt="${_ZSH_AI_CMD_PROMPT}"$'\n'"${context}"
 
-    local schema='{"type":"object","properties":{"command":{"type":"string","description":"The shell command to execute"}},"required":["command"],"additionalProperties":false}'
+    local schema='{
+      "type": "object",
+      "properties": {
+        "command": {
+          "type": "string",
+          "description": "The shell command to execute"
+        }
+      },
+      "required": ["command"],
+      "additionalProperties": false
+    }'
 
-    local payload="{\"model\":\"$ZSH_AI_CMD_MODEL\",\"max_tokens\":256,\"system\":\"$prompt\",\"messages\":[{\"role\":\"user\",\"content\":\"$input\"}],\"output_format\":{\"type\":\"json_schema\",\"schema\":$schema}}"
+    # Build payload with jq (handles all escaping correctly)
+    local payload
+    payload=$(command jq -nc \
+        --arg model "$ZSH_AI_CMD_MODEL" \
+        --arg system "$prompt" \
+        --arg content "$input" \
+        --argjson schema "$schema" \
+        '{
+          model: $model,
+          max_tokens: 256,
+          system: $system,
+          messages: [{role: "user", content: $content}],
+          output_format: {type: "json_schema", schema: $schema}
+        }')
 
     local response
     response=$(command curl -sS --max-time 30 "https://api.anthropic.com/v1/messages" \
