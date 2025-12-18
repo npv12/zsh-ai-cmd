@@ -142,10 +142,7 @@ _zsh_ai_cmd_call_api() {
 _zsh_ai_cmd_suggest() {
   [[ -z $BUFFER ]] && return
 
-  _zsh_ai_cmd_get_key || {
-    zle -M "zsh-ai-cmd: API key not found"
-    return 1
-  }
+  _zsh_ai_cmd_get_key || { BUFFER=""; zle accept-line; return 1; }
 
   # Show spinner
   local spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
@@ -240,6 +237,7 @@ _zsh_ai_cmd_get_key() {
   [[ -n $ANTHROPIC_API_KEY ]] && return 0
   ANTHROPIC_API_KEY=$(security find-generic-password \
     -s "anthropic-api-key" -a "$USER" -w 2>/dev/null) || {
+    print -u2 ""
     print -u2 "zsh-ai-cmd: ANTHROPIC_API_KEY not found"
     print -u2 ""
     print -u2 "Set it via environment variable:"
