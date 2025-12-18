@@ -10,7 +10,7 @@ Requires `curl`, `jq`, and an [Anthropic API key](https://console.anthropic.com/
 
 ```sh
 # Clone
-git clone https://github.com/yourusername/zsh-ai-cmd ~/.zsh-ai-cmd
+git clone https://github.com/kylesnowschwartz/zsh-ai-cmd ~/.zsh-ai-cmd
 
 # Add to .zshrc
 source ~/.zsh-ai-cmd/zsh-ai-cmd.plugin.zsh
