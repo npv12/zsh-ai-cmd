@@ -6,6 +6,7 @@
 # ============================================================================
 # Configuration
 # ============================================================================
+typeset -g ZSH_AI_CMD_KEY=${ZSH_AI_CMD_KEY:-'^z'}
 typeset -g ZSH_AI_CMD_DEBUG=${ZSH_AI_CMD_DEBUG:-false}
 typeset -g ZSH_AI_CMD_MODEL=${ZSH_AI_CMD_MODEL:-'claude-haiku-4-5-20251001'}
 
@@ -26,33 +27,48 @@ fi
 # ============================================================================
 # System Prompt
 # ============================================================================
-typeset -g _ZSH_AI_CMD_PROMPT='Complete the user intent as a shell command.
+typeset -g _ZSH_AI_CMD_PROMPT='Translate natural language to a single shell command.
 
 RULES:
 - Output EXACTLY ONE command, nothing else
-- Complete partial intents speculatively
-- If input looks like a command already, output it unchanged
-- If input is natural language, translate to shell
+- No explanations, no alternatives, no markdown
+- No code blocks, no backticks
+- If ambiguous, pick the most reasonable interpretation
 - Prefix standard tools with `command` to bypass aliases
+
+EFFICIENCY:
+- Avoid spawning processes per item: use -exec {} + not -exec {} \;
+- Use built-in formatting: find -printf, stat -c (not piping to awk/sed)
+- Add limits on unbounded searches: head, -maxdepth, 2>/dev/null for errors
+- Prefer human-readable output where appropriate (-h flags for sizes)
 
 <examples>
 User: list files
 command ls -la
 
-User: find py
-command find . -name "*.py"
+User: find 10 largest files
+command find . -type f -exec stat -f "%z %N" {} + 2>/dev/null | sort -rn | head -10
 
-User: git st
-git status
+User: find python files modified today
+command find . -name "*.py" -mtime -1
 
-User: show disk
-command df -h
+User: search for TODO in js files
+command grep -r "TODO" --include="*.js" .
 
-User: kill port 3000
+User: consolidate git worktree into primary repo
+git worktree remove .
+
+User: kill process on port 3000
 command lsof -ti:3000 | xargs kill -9
 
-User: grep TODO
-command grep -r "TODO" .
+User: show disk usage by folder sorted by size
+command du -h -d 1 | sort -hr | head -20
+
+User: what is listening on port 8080
+command lsof -i :8080
+
+User: show processes sorted by memory
+command ps aux -m | head -15
 </examples>'
 
 typeset -g _ZSH_AI_CMD_CONTEXT='<context>
@@ -116,19 +132,31 @@ _zsh_ai_cmd_call_api() {
     --argjson schema "$schema" \
     '{
       model: $model,
-      max_tokens: 128,
+      max_tokens: 256,
       system: $system,
       messages: [{role: "user", content: $content}],
       output_format: {type: "json_schema", schema: $schema}
     }')
 
   local response
-  response=$(command curl -sS --max-time 10 "https://api.anthropic.com/v1/messages" \
+  response=$(command curl -sS --max-time 30 "https://api.anthropic.com/v1/messages" \
     -H "Content-Type: application/json" \
     -H "x-api-key: $ANTHROPIC_API_KEY" \
     -H "anthropic-version: 2023-06-01" \
     -H "anthropic-beta: structured-outputs-2025-11-13" \
     -d "$payload" 2>/dev/null)
+
+  # Debug log (full request/response for inspection)
+  if [[ $ZSH_AI_CMD_DEBUG == true ]]; then
+    {
+      print -- "=== $(date '+%Y-%m-%d %H:%M:%S') ==="
+      print -- "--- REQUEST ---"
+      command jq . <<< "$payload"
+      print -- "--- RESPONSE ---"
+      command jq . <<< "$response"
+      print ""
+    } >>/tmp/zsh-ai-cmd.log
+  fi
 
   # Extract command from structured output
   print -r -- "$response" | command jq -re '.content[0].text | fromjson | .command // empty' 2>/dev/null
@@ -153,9 +181,10 @@ _zsh_ai_cmd_suggest() {
   local spinner='⠋⠙⠹⠸⠼⠴⠦⠧⠇⠏'
   local i=0
 
-  # Start API call in background
+  # Start API call in background (suppress job control noise)
   local tmpfile=$(mktemp)
-  ( _zsh_ai_cmd_call_api "$BUFFER" > "$tmpfile" ) &
+  setopt local_options no_notify no_monitor
+  ( _zsh_ai_cmd_call_api "$BUFFER" > "$tmpfile" ) &!
   local pid=$!
 
   # Animate spinner while waiting
@@ -165,13 +194,11 @@ _zsh_ai_cmd_suggest() {
     read -t 0.1 -k 1 && { kill $pid 2>/dev/null; POSTDISPLAY=""; rm -f "$tmpfile"; return; }
     ((i++))
   done
-  wait $pid
+  wait $pid 2>/dev/null
 
   # Read result
   local suggestion=$(<"$tmpfile")
   rm -f "$tmpfile"
-
-  [[ $ZSH_AI_CMD_DEBUG == true ]] && print -- "suggest: got '$suggestion'" >> /tmp/zsh-ai-cmd.log
 
   if [[ -n $suggestion ]]; then
     _ZSH_AI_CMD_SUGGESTION=$suggestion
@@ -248,7 +275,7 @@ zle -N backward-delete-char _zsh_ai_cmd_backward_delete_char
 zle -N _zsh_ai_cmd_suggest
 zle -N _zsh_ai_cmd_accept
 
-bindkey '^Z' _zsh_ai_cmd_suggest
+bindkey "$ZSH_AI_CMD_KEY" _zsh_ai_cmd_suggest
 bindkey '^I' _zsh_ai_cmd_accept
 
 # ============================================================================
@@ -258,5 +285,14 @@ bindkey '^I' _zsh_ai_cmd_accept
 _zsh_ai_cmd_get_key() {
   [[ -n $ANTHROPIC_API_KEY ]] && return 0
   ANTHROPIC_API_KEY=$(security find-generic-password \
-    -s "anthropic-api-key" -a "$USER" -w 2>/dev/null) || return 1
+    -s "anthropic-api-key" -a "$USER" -w 2>/dev/null) || {
+    print -u2 "zsh-ai-cmd: ANTHROPIC_API_KEY not found"
+    print -u2 ""
+    print -u2 "Set it via environment variable:"
+    print -u2 "  export ANTHROPIC_API_KEY='sk-ant-...'"
+    print -u2 ""
+    print -u2 "Or store in macOS Keychain:"
+    print -u2 "  security add-generic-password -s 'anthropic-api-key' -a '\$USER' -w 'sk-ant-...'"
+    return 1
+  }
 }
