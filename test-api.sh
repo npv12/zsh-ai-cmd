@@ -44,8 +44,8 @@ get_api_key() {
   local key_var="${(U)provider}_API_KEY"
   local keychain_name="${provider}-api-key"
 
-  # Check env var
-  [[ -n ${(P)key_var} ]] && return 0
+  # Check env var (use :- to avoid set -u error)
+  [[ -n ${(P)key_var:-} ]] && return 0
 
   # Try macOS Keychain
   local key
