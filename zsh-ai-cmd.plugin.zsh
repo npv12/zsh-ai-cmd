@@ -78,6 +78,7 @@ source "${0:a:h}/providers/openai.zsh"
 source "${0:a:h}/providers/ollama.zsh"
 source "${0:a:h}/providers/deepseek.zsh"
 source "${0:a:h}/providers/gemini.zsh"
+source "${0:a:h}/providers/copilot.zsh"
 
 # ============================================================================
 # Ghost Text Display
@@ -199,6 +200,7 @@ _zsh_ai_cmd_call_api() {
     ollama)    _zsh_ai_cmd_ollama_call "$input" "$prompt" ;;
     deepseek)  _zsh_ai_cmd_deepseek_call "$input" "$prompt" ;;
     gemini)    _zsh_ai_cmd_gemini_call "$input" "$prompt" ;;
+    copilot)   _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
     *) print -u2 "zsh-ai-cmd: Unknown provider '$ZSH_AI_CMD_PROVIDER'"; return 1 ;;
   esac
 }
@@ -311,8 +313,8 @@ fi
 _zsh_ai_cmd_get_key() {
   local provider=$ZSH_AI_CMD_PROVIDER
 
-  # Ollama doesn't need a key
-  [[ $provider == ollama ]] && return 0
+  # Ollama and Copilot don't need a key
+  [[ $provider == ollama || $provider == copilot ]] && return 0
 
   local key_var="${(U)provider}_API_KEY"
   local keychain_name="${provider}-api-key"

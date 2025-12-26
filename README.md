@@ -16,14 +16,14 @@ git clone https://github.com/kylesnowschwartz/zsh-ai-cmd ~/.zsh-ai-cmd
 source ~/.zsh-ai-cmd/zsh-ai-cmd.plugin.zsh
 
 # Choose your provider (default: anthropic)
-export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama
+export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama, copilot
 
 # Set API key for your chosen provider
 export ANTHROPIC_API_KEY='sk-ant-...'
 export OPENAI_API_KEY='sk-...'
 export GEMINI_API_KEY='...'
 export DEEPSEEK_API_KEY='sk-...'
-# Ollama needs no key (local)
+# Ollama and Copilot need no key (local services)
 
 # Or use macOS Keychain
 security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
@@ -39,7 +39,7 @@ security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
 ## Configuration
 
 ```sh
-ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama
+ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot
 ZSH_AI_CMD_KEY='^z'                          # Trigger key (default: Ctrl+Z)
 ZSH_AI_CMD_HIGHLIGHT='fg=8'                  # Ghost text style (zsh region_highlight format)
 ZSH_AI_CMD_DEBUG=false                       # Enable debug logging
@@ -51,11 +51,15 @@ ZSH_AI_CMD_OPENAI_MODEL='gpt-5.2-2025-12-11'
 ZSH_AI_CMD_GEMINI_MODEL='gemini-3-flash-preview'
 ZSH_AI_CMD_DEEPSEEK_MODEL='deepseek-chat'
 ZSH_AI_CMD_OLLAMA_MODEL='mistral-small'
+ZSH_AI_CMD_COPILOT_MODEL='gpt-4o'           # Requires copilot-api (npx copilot-api start)
+ZSH_AI_CMD_COPILOT_HOST='localhost:4141'    # copilot-api endpoint
 ```
 
 ## Provider Comparison
 
 All providers pass the test suite (19/19). Full output comparison:
+
+**Note:** Copilot provider requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running locally. Install and start with `npx copilot-api start`.
 
 <details>
 <summary>Click to expand full comparison table</summary>

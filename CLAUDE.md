@@ -19,8 +19,11 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
  | Gemini     | `providers/gemini.zsh`    | `gemini-3-flash-preview`    | `GEMINI_API_KEY`    |
  | DeepSeek   | `providers/deepseek.zsh`  | `deepseek-chat`             | `DEEPSEEK_API_KEY`  |
  | Ollama     | `providers/ollama.zsh`    | `mistral-small`             | (none - local)      |
+ | Copilot    | `providers/copilot.zsh`   | `gpt-4o`                    | (none - local)      |
 
 Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
+
+**Note:** Copilot requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running. Install and start with `npx copilot-api start`.
 
 ### Provider Implementation
 
