@@ -169,6 +169,7 @@ get_model_name() {
     ollama)    print "$ZSH_AI_CMD_OLLAMA_MODEL" ;;
     deepseek)  print "$ZSH_AI_CMD_DEEPSEEK_MODEL" ;;
     gemini)    print "$ZSH_AI_CMD_GEMINI_MODEL" ;;
+    copilot)   print "$ZSH_AI_CMD_COPILOT_MODEL" ;;
   esac
 }
 
