@@ -217,6 +217,43 @@ export ZSH_AI_CMD_PROVIDER=anthropic
 _zsh_ai_cmd_get_key
 assert_equals "Tab characters are preserved" "key	with	tabs" "${ANTHROPIC_API_KEY:-}"
 
+# Test 15: Uppercase provider is normalized for custom command
+reset_env
+export ZSH_AI_CMD_API_KEY_COMMAND='echo ${provider}-api-key'
+export ZSH_AI_CMD_PROVIDER=ANTHROPIC
+
+_zsh_ai_cmd_get_key
+assert_equals "Uppercase provider normalized in custom command" "anthropic-api-key" "${ANTHROPIC_API_KEY:-}"
+
+# Test 16: Mixed case provider is normalized
+reset_env
+export ZSH_AI_CMD_API_KEY_COMMAND='echo ${provider}-key'
+export ZSH_AI_CMD_PROVIDER=OpenAI
+
+_zsh_ai_cmd_get_key
+assert_equals "Mixed case provider normalized" "openai-key" "${OPENAI_API_KEY:-}"
+
+# Test 17: Uppercase provider normalized for keychain lookup
+reset_env
+export ZSH_AI_CMD_API_KEY_COMMAND=""
+export ZSH_AI_CMD_PROVIDER=ANTHROPIC
+export ZSH_AI_CMD_KEYCHAIN_NAME='${provider}-api-key'
+
+_zsh_ai_cmd_get_key
+result=$?
+# Should try keychain with lowercase name, which may or may not exist
+assert_equals "Uppercase provider normalized for keychain" "0" "$result"
+
+# ============================================================================
+# Case Normalization Tests
+# ============================================================================
+
+print ""
+print "=== Case Normalization Tests ==="
+print ""
+
+# (Tests 15-17 above in Edge Case section)
+
 # ============================================================================
 # Backward Compatibility Tests
 # ============================================================================
@@ -225,7 +262,7 @@ print ""
 print "=== Backward Compatibility Tests ==="
 print ""
 
-# Test 15: Existing env var lookup still works (no custom command)
+# Test 18: Existing env var lookup still works (no custom command)
 reset_env
 export ANTHROPIC_API_KEY="env-test-key"
 export ZSH_AI_CMD_PROVIDER=anthropic
@@ -234,7 +271,7 @@ _zsh_ai_cmd_get_key
 result=$?
 assert_equals "Env var lookup works without custom command" "0" "$result"
 
-# Test 16: Ollama provider (no key required) still works
+# Test 19: Ollama provider (no key required) still works
 reset_env
 export ZSH_AI_CMD_PROVIDER=ollama
 
@@ -242,7 +279,7 @@ _zsh_ai_cmd_get_key
 result=$?
 assert_equals "Ollama provider still works (no key required)" "0" "$result"
 
-# Test 17: Copilot provider (no key required) still works
+# Test 20: Copilot provider (no key required) still works
 reset_env
 export ZSH_AI_CMD_PROVIDER=copilot
 

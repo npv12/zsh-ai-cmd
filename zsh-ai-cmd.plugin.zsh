@@ -320,7 +320,7 @@ fi
 # ============================================================================
 
 _zsh_ai_cmd_get_key() {
-  local provider=$ZSH_AI_CMD_PROVIDER
+  local provider="${(L)ZSH_AI_CMD_PROVIDER}"  # Normalize provider to lowercase
 
   # Ollama and Copilot don't need a key
   [[ $provider == ollama || $provider == copilot ]] && return 0
