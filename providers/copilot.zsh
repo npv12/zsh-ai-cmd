@@ -47,13 +47,8 @@ _zsh_ai_cmd_copilot_call() {
     return 1
   fi
 
-  # Extract command from response
-  # Try structured JSON first, fall back to plain text (copilot-api returns plain text)
-  local content
-  content=$(print -r -- "$response" | command jq -re '.choices[0].message.content // empty' 2>/dev/null)
-  if [[ -n $content ]]; then
-    print -r -- "$content" | command jq -re '.command // empty' 2>/dev/null || print -r -- "$content"
-  fi
+  # Extract command from response (plain text — copilot-api does not support structured output)
+  print -r -- "$response" | command jq -re '.choices[0].message.content // empty' 2>/dev/null
 }
 
 _zsh_ai_cmd_copilot_key_error() {
