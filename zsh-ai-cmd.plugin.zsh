@@ -335,6 +335,9 @@ _zsh_ai_cmd_chat() {
     return 1
   fi
 
+  # Ensure API key is loaded
+  _zsh_ai_cmd_get_key || return 1
+
   # Lazy OS detection
   if [[ -z $_ZSH_AI_CMD_OS ]]; then
     if [[ $OSTYPE == darwin* ]]; then
