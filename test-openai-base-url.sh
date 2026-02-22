@@ -14,35 +14,35 @@ FAIL=0
 # ============================================================================
 
 assert_equals() {
-  local name=$1
-  local expected=$2
-  local actual=$3
+	local name=$1
+	local expected=$2
+	local actual=$3
 
-  if [[ $expected == $actual ]]; then
-    print -P "%F{green}✓ PASS%f: $name"
-    ((PASS++))
-  else
-    print -P "%F{red}✗ FAIL%f: $name"
-    print "  Expected: $expected"
-    print "  Got:      $actual"
-    ((FAIL++))
-  fi
+	if [[ $expected == $actual ]]; then
+		print -P "%F{green}✓ PASS%f: $name"
+		((PASS++))
+	else
+		print -P "%F{red}✗ FAIL%f: $name"
+		print "  Expected: $expected"
+		print "  Got:      $actual"
+		((FAIL++))
+	fi
 }
 
 assert_contains() {
-  local name=$1
-  local pattern=$2
-  local text=$3
+	local name=$1
+	local pattern=$2
+	local text=$3
 
-  if [[ $text == *$pattern* ]]; then
-    print -P "%F{green}✓ PASS%f: $name"
-    ((PASS++))
-  else
-    print -P "%F{red}✗ FAIL%f: $name"
-    print "  Pattern: $pattern"
-    print "  Text:    $text"
-    ((FAIL++))
-  fi
+	if [[ $text == *$pattern* ]]; then
+		print -P "%F{green}✓ PASS%f: $name"
+		((PASS++))
+	else
+		print -P "%F{red}✗ FAIL%f: $name"
+		print "  Pattern: $pattern"
+		print "  Text:    $text"
+		((FAIL++))
+	fi
 }
 
 # ============================================================================
@@ -59,9 +59,9 @@ unset ZSH_AI_CMD_OPENAI_BASE_URL
 source "${SCRIPT_DIR}/providers/openai.zsh" 2>/dev/null
 
 assert_equals \
-  "ZSH_AI_CMD_OPENAI_BASE_URL defaults to OpenAI endpoint" \
-  "https://api.openai.com/v1/chat/completions" \
-  "$ZSH_AI_CMD_OPENAI_BASE_URL"
+	"ZSH_AI_CMD_OPENAI_BASE_URL defaults to OpenAI endpoint" \
+	"https://api.openai.com/v1/chat/completions" \
+	"$ZSH_AI_CMD_OPENAI_BASE_URL"
 
 # ============================================================================
 # Test 2: Override is respected (typeset -g ${VAR:-default} pattern)
@@ -79,9 +79,9 @@ export ZSH_AI_CMD_OPENAI_BASE_URL='http://localhost:9999/v1/chat/completions'
 source "${SCRIPT_DIR}/providers/openai.zsh" 2>/dev/null
 
 assert_equals \
-  "Pre-set ZSH_AI_CMD_OPENAI_BASE_URL is preserved after sourcing" \
-  "http://localhost:9999/v1/chat/completions" \
-  "$ZSH_AI_CMD_OPENAI_BASE_URL"
+	"Pre-set ZSH_AI_CMD_OPENAI_BASE_URL is preserved after sourcing" \
+	"http://localhost:9999/v1/chat/completions" \
+	"$ZSH_AI_CMD_OPENAI_BASE_URL"
 
 # ============================================================================
 # Test 3: Integration - request routes to custom URL
@@ -93,11 +93,11 @@ print ""
 
 # Check python3 is available
 if ! command -v python3 &>/dev/null; then
-  print -P "%F{yellow}⚠ SKIP%f: Integration test requires python3"
-  print ""
-  print "================================"
-  print "Results: $PASS passed, $FAIL failed (1 skipped)"
-  (( FAIL > 0 )) && exit 1 || exit 0
+	print -P "%F{yellow}⚠ SKIP%f: Integration test requires python3"
+	print ""
+	print "================================"
+	print "Results: $PASS passed, $FAIL failed (1 skipped)"
+	((FAIL > 0)) && exit 1 || exit 0
 fi
 
 MOCK_PORT=19876
@@ -139,7 +139,7 @@ class MockHandler(BaseHTTPRequestHandler):
 HTTPServer((\"127.0.0.1\", port), MockHandler).serve_forever()
 '''
 print(script)
-" > "$MOCK_SCRIPT"
+" >"$MOCK_SCRIPT"
 
 # Start mock server in background
 python3 "$MOCK_SCRIPT" "$MOCK_PORT" "$MOCK_REQUEST_FILE" &
@@ -150,39 +150,39 @@ sleep 0.4
 
 # Verify server is up before testing
 if ! kill -0 $MOCK_PID 2>/dev/null; then
-  print -P "%F{red}✗ FAIL%f: Mock server failed to start"
-  ((FAIL++))
+	print -P "%F{red}✗ FAIL%f: Mock server failed to start"
+	((FAIL++))
 else
-  # Source prompt and provider (reset guard variable so re-source works)
-  unfunction _zsh_ai_cmd_suggest 2>/dev/null || true
-  unset ZSH_AI_CMD_OPENAI_BASE_URL
+	# Source prompt and provider (reset guard variable so re-source works)
+	unfunction _zsh_ai_cmd_suggest 2>/dev/null || true
+	unset ZSH_AI_CMD_OPENAI_BASE_URL
 
-  export ZSH_AI_CMD_OPENAI_BASE_URL="http://127.0.0.1:${MOCK_PORT}/v1/chat/completions"
-  export OPENAI_API_KEY="test-key-for-mock"
-  export ZSH_AI_CMD_DEBUG=false
+	export ZSH_AI_CMD_OPENAI_BASE_URL="http://127.0.0.1:${MOCK_PORT}/v1/chat/completions"
+	export OPENAI_API_KEY="test-key-for-mock"
+	export ZSH_AI_CMD_DEBUG=false
 
-  source "${SCRIPT_DIR}/prompt.zsh" 2>/dev/null
-  source "${SCRIPT_DIR}/providers/openai.zsh" 2>/dev/null
+	source "${SCRIPT_DIR}/prompt.zsh" 2>/dev/null
+	source "${SCRIPT_DIR}/providers/openai.zsh" 2>/dev/null
 
-  # Call the provider directly
-  result=$(_zsh_ai_cmd_openai_call "list files" "$_ZSH_AI_CMD_PROMPT" 2>/dev/null)
+	# Call the provider directly
+	result=$(_zsh_ai_cmd_openai_call "list files" "$_ZSH_AI_CMD_PROMPT" 2>/dev/null)
 
-  assert_equals \
-    "Provider returns command parsed from mock response" \
-    "ls -la" \
-    "$result"
+	assert_equals \
+		"Provider returns command parsed from mock response" \
+		"ls -la" \
+		"$result"
 
-  # Verify the request actually hit our mock
-  if [[ -s $MOCK_REQUEST_FILE ]]; then
-    request_body=$(<$MOCK_REQUEST_FILE)
-    assert_contains \
-      "Request body contains the user input" \
-      "list files" \
-      "$request_body"
-  else
-    print -P "%F{red}✗ FAIL%f: Request body captured from mock (file empty - server not hit)"
-    ((FAIL++))
-  fi
+	# Verify the request actually hit our mock
+	if [[ -s $MOCK_REQUEST_FILE ]]; then
+		request_body=$(<$MOCK_REQUEST_FILE)
+		assert_contains \
+			"Request body contains the user input" \
+			"list files" \
+			"$request_body"
+	else
+		print -P "%F{red}✗ FAIL%f: Request body captured from mock (file empty - server not hit)"
+		((FAIL++))
+	fi
 fi
 
 # ============================================================================
@@ -193,4 +193,4 @@ print ""
 print "================================"
 print "Results: $PASS passed, $FAIL failed"
 
-(( FAIL > 0 )) && exit 1 || exit 0
+((FAIL > 0)) && exit 1 || exit 0

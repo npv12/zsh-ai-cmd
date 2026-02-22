@@ -24,58 +24,58 @@ source "${SCRIPT_DIR}/zsh-ai-cmd.plugin.zsh" 2>/dev/null
 # ============================================================================
 
 assert_equals() {
-  local name=$1
-  local expected=$2
-  local actual=$3
+	local name=$1
+	local expected=$2
+	local actual=$3
 
-  if [[ $expected == $actual ]]; then
-    print -P "%F{green}✓ PASS%f: $name"
-    ((PASS++))
-  else
-    print -P "%F{red}✗ FAIL%f: $name"
-    print "  Expected: $expected"
-    print "  Got:      $actual"
-    ((FAIL++))
-  fi
+	if [[ $expected == $actual ]]; then
+		print -P "%F{green}✓ PASS%f: $name"
+		((PASS++))
+	else
+		print -P "%F{red}✗ FAIL%f: $name"
+		print "  Expected: $expected"
+		print "  Got:      $actual"
+		((FAIL++))
+	fi
 }
 
 assert_contains() {
-  local name=$1
-  local pattern=$2
-  local text=$3
+	local name=$1
+	local pattern=$2
+	local text=$3
 
-  if [[ $text == *$pattern* ]]; then
-    print -P "%F{green}✓ PASS%f: $name"
-    ((PASS++))
-  else
-    print -P "%F{red}✗ FAIL%f: $name"
-    print "  Pattern: $pattern"
-    print "  Text:    $text"
-    ((FAIL++))
-  fi
+	if [[ $text == *$pattern* ]]; then
+		print -P "%F{green}✓ PASS%f: $name"
+		((PASS++))
+	else
+		print -P "%F{red}✗ FAIL%f: $name"
+		print "  Pattern: $pattern"
+		print "  Text:    $text"
+		((FAIL++))
+	fi
 }
 
 assert_not_contains() {
-  local name=$1
-  local pattern=$2
-  local text=$3
+	local name=$1
+	local pattern=$2
+	local text=$3
 
-  if [[ $text != *$pattern* ]]; then
-    print -P "%F{green}✓ PASS%f: $name"
-    ((PASS++))
-  else
-    print -P "%F{red}✗ FAIL%f: $name"
-    print "  Should not contain: $pattern"
-    print "  Text:              $text"
-    ((FAIL++))
-  fi
+	if [[ $text != *$pattern* ]]; then
+		print -P "%F{green}✓ PASS%f: $name"
+		((PASS++))
+	else
+		print -P "%F{red}✗ FAIL%f: $name"
+		print "  Should not contain: $pattern"
+		print "  Text:              $text"
+		((FAIL++))
+	fi
 }
 
 reset_env() {
-  # Unset all provider API keys
-  unset ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY DEEPSEEK_API_KEY
-  # Reset to clean state
-  ZSH_AI_CMD_API_KEY_COMMAND=""
+	# Unset all provider API keys
+	unset ANTHROPIC_API_KEY OPENAI_API_KEY GEMINI_API_KEY DEEPSEEK_API_KEY
+	# Reset to clean state
+	ZSH_AI_CMD_API_KEY_COMMAND=""
 }
 
 # ============================================================================
@@ -97,17 +97,17 @@ assert_equals "Custom command sets API key" "test-key-12345" "${ANTHROPIC_API_KE
 
 # Test 2: Debug logging shows command execution
 assert_contains "Debug log contains command" \
-  "command: echo test-key-12345" \
-  "$(<${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log})"
+	"command: echo test-key-12345" \
+	"$(<${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log})"
 
 # Test 3: Debug logging shows success without leaking key
 assert_contains "Debug log shows success" \
-  "result: success" \
-  "$(<${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log})"
+	"result: success" \
+	"$(<${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log})"
 
 assert_not_contains "Debug log does not leak key output in char count line" \
-  "result: success (13 chars)" \
-  "$(<${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log})" || true
+	"result: success (13 chars)" \
+	"$(<${ZSH_AI_CMD_LOG:-/tmp/zsh-ai-cmd.log})" || true
 # (Note: The command itself appears in the log, but the actual key output is never logged)
 
 # Test 4: Provider variable expansion ${provider} works
@@ -296,7 +296,7 @@ print "================================"
 print "Results: $PASS passed, $FAIL failed"
 
 if ((FAIL > 0)); then
-  exit 1
+	exit 1
 else
-  exit 0
+	exit 0
 fi

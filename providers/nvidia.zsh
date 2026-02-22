@@ -62,15 +62,15 @@ _zsh_ai_cmd_nvidia_call() {
   # NVIDIA returns JSON with literal newlines inside string values (invalid JSON)
   local content
   content=$(print -r -- "$response" | command jq -r '.choices[0].message.content // empty' 2>/dev/null)
-  
+
   # Debug: log what we extracted
   [[ $ZSH_AI_CMD_DEBUG == true ]] && {
     print -- "[nvidia] extracted content: $content" >> $ZSH_AI_CMD_LOG
   }
 
-local escaped_content
-escaped_content=$(print -r -- "$content" | command sed 's/\n/\\n/g')
-print -r -- "$escaped_content"
+  local escaped_content
+  escaped_content=$(print -r -- "$content" | command sed 's/\n/\\n/g')
+  print -r -- "$escaped_content"
 }
 
 _zsh_ai_cmd_nvidia_key_error() {

@@ -359,34 +359,34 @@ _zsh_ai_cmd_chat() {
   local response
 
   case $ZSH_AI_CMD_PROVIDER in
-    anthropic) 
+    anthropic)
       response=$(_zsh_ai_cmd_anthropic_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
-    openai)    
+    openai)
       response=$(_zsh_ai_cmd_openai_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
-    ollama)    
+    ollama)
       response=$(_zsh_ai_cmd_ollama_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
-    deepseek)  
+    deepseek)
       response=$(_zsh_ai_cmd_deepseek_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
-    gemini)    
+    gemini)
       response=$(_zsh_ai_cmd_gemini_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
-    copilot)   
+    copilot)
       response=$(_zsh_ai_cmd_copilot_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
-    openrouter) 
+    openrouter)
       response=$(_zsh_ai_cmd_openrouter_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
-    synthetic) 
+    synthetic)
       response=$(_zsh_ai_cmd_synthetic_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
-    nvidia) 
+    nvidia)
       response=$(_zsh_ai_cmd_nvidia_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
-    *) 
+    *)
       print -u2 "zsh-ai-cmd: Unknown provider '$ZSH_AI_CMD_PROVIDER'"
       return 1
       ;;

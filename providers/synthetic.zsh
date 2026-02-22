@@ -25,14 +25,14 @@ _zsh_ai_cmd_synthetic_call() {
   local response curl_exit http_status
   local tmpfile=$(mktemp)
   local errfile=$(mktemp)
-  
+
   http_status=$(command curl -sS --max-time 30 -w "%{http_code}" "$ZSH_AI_CMD_SYNTHETIC_BASE_URL" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $SYNTHETIC_API_KEY" \
     -d "$payload" \
     -o "$tmpfile" 2>"$errfile")
   curl_exit=$?
-  
+
   response=$(<"$tmpfile")
   local curl_err=$(<"$errfile")
   rm -f "$tmpfile" "$errfile"
@@ -61,7 +61,7 @@ _zsh_ai_cmd_synthetic_call() {
     [[ $ZSH_AI_CMD_DEBUG != true ]] && print -u2 "zsh-ai-cmd [synthetic]: curl failed (exit $curl_exit)"
     return 1
   fi
-  
+
   if [[ $http_status != 200 ]]; then
     [[ $ZSH_AI_CMD_DEBUG != true ]] && print -u2 "zsh-ai-cmd [synthetic]: HTTP $http_status"
     return 1
