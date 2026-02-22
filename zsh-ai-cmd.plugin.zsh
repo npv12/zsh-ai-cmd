@@ -239,7 +239,7 @@ _zsh_ai_cmd_suggest() {
 
   # Animate spinner while waiting
   while kill -0 $pid 2>/dev/null; do
-    POSTDISPLAY=" ${spinner:$((i % 10)):1}"
+    POSTDISPLAY="   ${spinner:$((i % 10)):1}"
     zle -R
     read -t 0.1 -k 1 && { kill $pid 2>/dev/null; POSTDISPLAY=""; rm -f "$tmpfile"; return; }
     ((i++))
