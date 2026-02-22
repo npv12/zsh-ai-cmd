@@ -16,13 +16,15 @@ git clone https://github.com/npv12/zsh-ai-cmd ~/.zsh-ai-cmd
 source ~/.zsh-ai-cmd/zsh-ai-cmd.plugin.zsh
 
 # Choose your provider (default: anthropic)
-export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama, copilot
+export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama, copilot, openrouter, synthetic
 
 # Set API key for your chosen provider
 export ANTHROPIC_API_KEY='sk-ant-...'
 export OPENAI_API_KEY='sk-...'
 export GEMINI_API_KEY='...'
 export DEEPSEEK_API_KEY='sk-...'
+export OPENROUTER_API_KEY='sk-or-v1-...'
+export SYNTHETIC_API_KEY='...'
 # Ollama and Copilot need no key (local services)
 
 # Or use macOS Keychain
@@ -39,7 +41,7 @@ security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
 ## Configuration
 
 ```sh
-ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot
+ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot, openrouter, synthetic
 ZSH_AI_CMD_KEY='^z'                          # Trigger key (default: Ctrl+Z)
 ZSH_AI_CMD_HIGHLIGHT='fg=8'                  # Ghost text style (zsh region_highlight format)
 ZSH_AI_CMD_DEBUG=false                       # Enable debug logging
@@ -61,6 +63,14 @@ ZSH_AI_CMD_OLLAMA_MODEL='mistral-small'
 ZSH_AI_CMD_OLLAMA_HOST='localhost:11434'    # ollama endpoint
 ZSH_AI_CMD_COPILOT_MODEL='gpt-4o'           # Requires copilot-api (npx copilot-api start)
 ZSH_AI_CMD_COPILOT_HOST='localhost:4141'    # copilot-api endpoint
+
+# OpenRouter provider (OpenAI-compatible API aggregator)
+ZSH_AI_CMD_OPENROUTER_MODEL='openai/gpt-oss-120b:free'
+ZSH_AI_CMD_OPENROUTER_BASE_URL='https://openrouter.ai/api/v1/chat/completions'
+
+# Synthetic provider (custom OpenAI-compatible endpoint)
+ZSH_AI_CMD_SYNTHETIC_MODEL='hf:moonshotai/Kimi-K2.5'
+ZSH_AI_CMD_SYNTHETIC_BASE_URL='https://api.synthetic.ai/v1/chat/completions'
 ```
 
 ## Custom API Key Retrieval
