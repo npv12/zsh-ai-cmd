@@ -1,6 +1,6 @@
 # providers/openrouter.zsh - OpenRouter API provider
 # OpenRouter provides a unified API for multiple LLM providers
-# Uses OpenAI-compatible format with structured outputs
+# Uses OpenAI-compatible format
 
 typeset -g ZSH_AI_CMD_OPENROUTER_MODEL=${ZSH_AI_CMD_OPENROUTER_MODEL:-'openai/gpt-oss-120b:free'}
 typeset -g ZSH_AI_CMD_OPENROUTER_BASE_URL=${ZSH_AI_CMD_OPENROUTER_BASE_URL:-'https://openrouter.ai/api/v1/chat/completions'}
@@ -19,22 +19,7 @@ _zsh_ai_cmd_openrouter_call() {
       messages: [
         {role: "system", content: $system},
         {role: "user", content: $content}
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "shell_command",
-          schema: {
-            type: "object",
-            properties: {
-              command: {type: "string", description: "The shell command"}
-            },
-            required: ["command"],
-            additionalProperties: false
-          },
-          strict: true
-        }
-      }
+      ]
     }')
 
   local response
@@ -52,7 +37,7 @@ _zsh_ai_cmd_openrouter_call() {
       print -- "--- REQUEST ---"
       command jq . <<< "$payload"
       print -- "--- RESPONSE ---"
-      command jq . <<< "$response"
+      command jq . <<< "$response" 2>/dev/null || print -r -- "$response"
       print ""
     } >>$ZSH_AI_CMD_LOG
   fi
@@ -65,8 +50,8 @@ _zsh_ai_cmd_openrouter_call() {
     return 1
   fi
 
-  # Extract command from response
-  print -r -- "$response" | command jq -re '.choices[0].message.content | fromjson | .command // empty' 2>/dev/null
+  # Extract content from response
+  print -r -- "$response" | command jq -re '.choices[0].message.content // empty' 2>/dev/null
 }
 
 _zsh_ai_cmd_openrouter_key_error() {

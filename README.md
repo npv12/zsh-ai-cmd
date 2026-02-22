@@ -16,7 +16,7 @@ git clone https://github.com/npv12/zsh-ai-cmd ~/.zsh-ai-cmd
 source ~/.zsh-ai-cmd/zsh-ai-cmd.plugin.zsh
 
 # Choose your provider (default: anthropic)
-export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama, copilot, openrouter, synthetic
+export ZSH_AI_CMD_PROVIDER='anthropic'  # or: openai, gemini, deepseek, ollama, copilot, openrouter, synthetic, nvidia
 
 # Set API key for your chosen provider
 export ANTHROPIC_API_KEY='sk-ant-...'
@@ -25,6 +25,7 @@ export GEMINI_API_KEY='...'
 export DEEPSEEK_API_KEY='sk-...'
 export OPENROUTER_API_KEY='sk-or-v1-...'
 export SYNTHETIC_API_KEY='...'
+export NVIDIA_API_KEY='nvapi-...'
 # Ollama and Copilot need no key (local services)
 
 # Or use macOS Keychain
@@ -41,7 +42,7 @@ security add-generic-password -s 'anthropic-api-key' -a "$USER" -w 'sk-ant-...'
 ## Configuration
 
 ```sh
-ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot, openrouter, synthetic
+ZSH_AI_CMD_PROVIDER='anthropic'              # Provider: anthropic, openai, gemini, deepseek, ollama, copilot, openrouter, synthetic, nvidia
 ZSH_AI_CMD_KEY='^z'                          # Trigger key (default: Ctrl+Z)
 ZSH_AI_CMD_HIGHLIGHT='fg=8'                  # Ghost text style (zsh region_highlight format)
 ZSH_AI_CMD_DEBUG=false                       # Enable debug logging
@@ -71,6 +72,10 @@ ZSH_AI_CMD_OPENROUTER_BASE_URL='https://openrouter.ai/api/v1/chat/completions'
 # Synthetic provider (OpenAI-compatible API at api.synthetic.new)
 ZSH_AI_CMD_SYNTHETIC_MODEL='hf:moonshotai/Kimi-K2.5'
 ZSH_AI_CMD_SYNTHETIC_BASE_URL='https://api.synthetic.new/openai/v1/chat/completions'
+
+# NVIDIA NIM provider (OpenAI-compatible API for NVIDIA-hosted models)
+ZSH_AI_CMD_NVIDIA_MODEL='openai/gpt-oss-120b'
+ZSH_AI_CMD_NVIDIA_BASE_URL='https://integrate.api.nvidia.com/v1/chat/completions'
 ```
 
 ## Custom API Key Retrieval

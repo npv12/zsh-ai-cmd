@@ -23,7 +23,7 @@ typeset -g ZSH_AI_CMD_KEYCHAIN_NAME=${ZSH_AI_CMD_KEYCHAIN_NAME:-'${provider}-api
 # Examples: 'pass ${provider}-api-key', 'secret-tool lookup service ${provider}'
 typeset -g ZSH_AI_CMD_API_KEY_COMMAND=${ZSH_AI_CMD_API_KEY_COMMAND:-''}
 
-# Provider selection (anthropic, openai, gemini, deepseek, ollama, copilot, openrouter, synthetic)
+# Provider selection (anthropic, openai, gemini, deepseek, ollama, copilot, openrouter, synthetic, nvidia)
 typeset -g ZSH_AI_CMD_PROVIDER=${ZSH_AI_CMD_PROVIDER:-'anthropic'}
 
 # Legacy model variable maps to anthropic model for backwards compatibility
@@ -90,6 +90,7 @@ source "${0:a:h}/providers/gemini.zsh"
 source "${0:a:h}/providers/copilot.zsh"
 source "${0:a:h}/providers/openrouter.zsh"
 source "${0:a:h}/providers/synthetic.zsh"
+source "${0:a:h}/providers/nvidia.zsh"
 
 # ============================================================================
 # Ghost Text Display
@@ -214,6 +215,7 @@ _zsh_ai_cmd_call_api() {
     copilot)   _zsh_ai_cmd_copilot_call "$input" "$prompt" ;;
     openrouter) _zsh_ai_cmd_openrouter_call "$input" "$prompt" ;;
     synthetic) _zsh_ai_cmd_synthetic_call "$input" "$prompt" ;;
+    nvidia)    _zsh_ai_cmd_nvidia_call "$input" "$prompt" ;;
     *) print -u2 "zsh-ai-cmd: Unknown provider '$ZSH_AI_CMD_PROVIDER'"; return 1 ;;
   esac
 }
@@ -380,6 +382,9 @@ _zsh_ai_cmd_chat() {
       ;;
     synthetic) 
       response=$(_zsh_ai_cmd_synthetic_call "$user_prompt" "$full_prompt" 2>/dev/null)
+      ;;
+    nvidia) 
+      response=$(_zsh_ai_cmd_nvidia_call "$user_prompt" "$full_prompt" 2>/dev/null)
       ;;
     *) 
       print -u2 "zsh-ai-cmd: Unknown provider '$ZSH_AI_CMD_PROVIDER'"
