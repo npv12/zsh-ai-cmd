@@ -10,7 +10,7 @@ Requires `curl`, `jq`, and an API key for your chosen provider.
 
 ```sh
 # Clone
-git clone https://github.com/kylesnowschwartz/zsh-ai-cmd ~/.zsh-ai-cmd
+git clone https://github.com/npv12/zsh-ai-cmd ~/.zsh-ai-cmd
 
 # Add to .zshrc
 source ~/.zsh-ai-cmd/zsh-ai-cmd.plugin.zsh
