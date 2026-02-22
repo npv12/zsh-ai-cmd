@@ -47,6 +47,29 @@ Each provider file exports two functions:
 
 All providers use structured outputs (JSON schema) where supported for reliable command extraction. The system prompt is shared across providers via `$_ZSH_AI_CMD_PROMPT` from `prompt.zsh`.
 
+### Generic Chat API
+
+For programmatic use (e.g., commit message generation), use `_zsh_ai_cmd_chat`:
+
+```zsh
+_zsh_ai_cmd_chat "$system_prompt" "$user_prompt"
+```
+
+This function:
+- Uses the configured provider (`ZSH_AI_CMD_PROVIDER`)
+- Returns raw response text (not sanitized)
+- Can be used for JSON responses, commit messages, etc.
+- Supports all the same providers as the widget
+
+Example usage in other scripts:
+```zsh
+# Source zsh-ai-cmd
+source ~/.zsh-ai-cmd/zsh-ai-cmd.plugin.zsh
+
+# Use the chat function
+response=$(_zsh_ai_cmd_chat "You are a helpful assistant." "What is 2+2?")
+```
+
 ### Core Components
 
 **Core Flow:**
