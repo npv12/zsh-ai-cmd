@@ -16,7 +16,6 @@ _zsh_ai_cmd_openrouter_call() {
     --arg content "$input" \
     '{
       model: $model,
-      max_completion_tokens: 256,
       messages: [
         {role: "system", content: $system},
         {role: "user", content: $content}

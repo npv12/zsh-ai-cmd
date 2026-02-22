@@ -68,9 +68,9 @@ ZSH_AI_CMD_COPILOT_HOST='localhost:4141'    # copilot-api endpoint
 ZSH_AI_CMD_OPENROUTER_MODEL='openai/gpt-oss-120b:free'
 ZSH_AI_CMD_OPENROUTER_BASE_URL='https://openrouter.ai/api/v1/chat/completions'
 
-# Synthetic provider (custom OpenAI-compatible endpoint)
+# Synthetic provider (OpenAI-compatible API at api.synthetic.new)
 ZSH_AI_CMD_SYNTHETIC_MODEL='hf:moonshotai/Kimi-K2.5'
-ZSH_AI_CMD_SYNTHETIC_BASE_URL='https://api.synthetic.ai/v1/chat/completions'
+ZSH_AI_CMD_SYNTHETIC_BASE_URL='https://api.synthetic.new/openai/v1/chat/completions'
 ```
 
 ## Custom API Key Retrieval

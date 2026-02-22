@@ -23,6 +23,11 @@ The main plugin lives in @zsh-ai-cmd.plugin.zsh with provider implementations in
  | OpenRouter | `providers/openrouter.zsh`  | `openai/gpt-oss-120b:free`  | `OPENROUTER_API_KEY`| `ZSH_AI_CMD_OPENROUTER_BASE_URL` |
  | Synthetic  | `providers/synthetic.zsh`   | `hf:moonshotai/Kimi-K2.5`   | `SYNTHETIC_API_KEY` | `ZSH_AI_CMD_SYNTHETIC_BASE_URL` |
 
+**Synthetic Notes:**
+- Models must be prefixed with `hf:` (e.g., `hf:moonshotai/Kimi-K2.5`)
+- Endpoint: `https://api.synthetic.new/openai/v1/chat/completions`
+- Supports both plain text and JSON schema responses
+
 Set provider via `ZSH_AI_CMD_PROVIDER='openai'` (default: `anthropic`).
 
 **Note:** Copilot requires [copilot-api](https://github.com/ericc-ch/copilot-api) to be running. Install and start with `npx copilot-api start`.

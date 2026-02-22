@@ -1,9 +1,9 @@
 # providers/synthetic.zsh - Synthetic API provider
-# Generic OpenAI-compatible API provider for custom/local endpoints
-# Configure with ZSH_AI_CMD_SYNTHETIC_BASE_URL and ZSH_AI_CMD_SYNTHETIC_MODEL
+# Generic OpenAI-compatible API provider
+# Endpoint: https://api.synthetic.new/openai/v1/chat/completions
 
 typeset -g ZSH_AI_CMD_SYNTHETIC_MODEL=${ZSH_AI_CMD_SYNTHETIC_MODEL:-'hf:moonshotai/Kimi-K2.5'}
-typeset -g ZSH_AI_CMD_SYNTHETIC_BASE_URL=${ZSH_AI_CMD_SYNTHETIC_BASE_URL:-'https://api.synth.sh/v1/chat/completions'}
+typeset -g ZSH_AI_CMD_SYNTHETIC_BASE_URL=${ZSH_AI_CMD_SYNTHETIC_BASE_URL:-'https://api.synthetic.new/openai/v1/chat/completions'}
 
 _zsh_ai_cmd_synthetic_call() {
   local input=$1
@@ -16,44 +16,55 @@ _zsh_ai_cmd_synthetic_call() {
     --arg content "$input" \
     '{
       model: $model,
-      max_completion_tokens: 256,
       messages: [
         {role: "system", content: $system},
         {role: "user", content: $content}
-      ],
-      response_format: {
-        type: "json_schema",
-        json_schema: {
-          name: "shell_command",
-          schema: {
-            type: "object",
-            properties: {
-              command: {type: "string", description: "The shell command"}
-            },
-            required: ["command"],
-            additionalProperties: false
-          },
-          strict: true
-        }
-      }
+      ]
     }')
 
-  local response
-  response=$(command curl -sS --max-time 30 "$ZSH_AI_CMD_SYNTHETIC_BASE_URL" \
+  local response curl_exit http_status
+  local tmpfile=$(mktemp)
+  local errfile=$(mktemp)
+  
+  http_status=$(command curl -sS --max-time 30 -w "%{http_code}" "$ZSH_AI_CMD_SYNTHETIC_BASE_URL" \
     -H "Content-Type: application/json" \
     -H "Authorization: Bearer $SYNTHETIC_API_KEY" \
-    -d "$payload" 2>/dev/null)
+    -d "$payload" \
+    -o "$tmpfile" 2>"$errfile")
+  curl_exit=$?
+  
+  response=$(<"$tmpfile")
+  local curl_err=$(<"$errfile")
+  rm -f "$tmpfile" "$errfile"
 
   # Debug log
   if [[ $ZSH_AI_CMD_DEBUG == true ]]; then
     {
       print -- "=== $(date '+%Y-%m-%d %H:%M:%S') [synthetic] ==="
+      print -- "curl exit: $curl_exit"
+      print -- "HTTP status: $http_status"
+      [[ -n $curl_err ]] && print -- "curl error: $curl_err"
       print -- "--- REQUEST ---"
       command jq . <<< "$payload"
       print -- "--- RESPONSE ---"
-      command jq . <<< "$response"
+      if [[ -n $response ]]; then
+        command jq . <<< "$response" 2>/dev/null || print -r -- "$response"
+      else
+        print -- "(empty response)"
+      fi
       print ""
     } >>$ZSH_AI_CMD_LOG
+  fi
+
+  # Check for failures
+  if [[ $curl_exit -ne 0 ]]; then
+    [[ $ZSH_AI_CMD_DEBUG != true ]] && print -u2 "zsh-ai-cmd [synthetic]: curl failed (exit $curl_exit)"
+    return 1
+  fi
+  
+  if [[ $http_status != 200 ]]; then
+    [[ $ZSH_AI_CMD_DEBUG != true ]] && print -u2 "zsh-ai-cmd [synthetic]: HTTP $http_status"
+    return 1
   fi
 
   # Check for API error
@@ -64,8 +75,8 @@ _zsh_ai_cmd_synthetic_call() {
     return 1
   fi
 
-  # Extract command from response
-  print -r -- "$response" | command jq -re '.choices[0].message.content | fromjson | .command // empty' 2>/dev/null
+  # Extract content
+  print -r -- "$response" | command jq -re '.choices[0].message.content // empty' 2>/dev/null
 }
 
 _zsh_ai_cmd_synthetic_key_error() {
